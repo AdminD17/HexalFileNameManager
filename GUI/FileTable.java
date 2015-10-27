@@ -4,13 +4,15 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.File;
 import java.util.ArrayList;
+
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import ExtraClass.GUI.DnDFilePanel.DnDFileEvent;
-import ExtraClass.GUI.DnDFilePanel.DnDFileListener;
-import ExtraClass.GUI.DnDFilePanel.DnDFilePanel;
+import net.iharder.dnd.FileDrop;
+import net.iharder.dnd.FileDrop.Listener;
+
 
 
 /**
@@ -19,7 +21,7 @@ import ExtraClass.GUI.DnDFilePanel.DnDFilePanel;
  * @author David Giordana
  *
  */
-public class FileTable extends DnDFilePanel{
+public class FileTable extends JPanel implements Listener{
 
 	private static final long serialVersionUID = 9002333815314926106L;
 
@@ -61,6 +63,10 @@ public class FileTable extends DnDFilePanel{
 
 	//constraint para el layot
 	private GridBagConstraints gbc;
+	
+	//API Drag an drop
+	@SuppressWarnings("unused")
+	private FileDrop dnd;
 
 	/**
 	 * ---- CONSTRUCTOR
@@ -75,6 +81,8 @@ public class FileTable extends DnDFilePanel{
 		model = new DefaultTableModel();
 		table = new JTable(model);
 		scroll = new JScrollPane(table);		
+		dnd = new FileDrop(this, this);
+		
 		//agrega los componentes al panel
 		this.setLayout(new GridBagLayout());
 		gbc.gridx = 0;
@@ -85,28 +93,9 @@ public class FileTable extends DnDFilePanel{
 		gbc.weighty = 1.0;
 		gbc.fill= GridBagConstraints.BOTH;
 		this.add(scroll , gbc);
+		
 		//setea la tabla
 		model.setColumnIdentifiers(COLUMNS);
-		this.addDnDFileListener(new DnDFileListener(){
-
-			@Override
-			public void filesDropped(DnDFileEvent e) {
-				for (File file : e.getFiles()) {
-					String [] rowData = new String[3];
-					rowData[OLD_NAME_INDEX] = file.getName();
-					rowData[NEW_NAME_INDEX] = file.getName();
-					rowData[SOURCE_INDEX] = file.getParent();
-					if(!rowData[SOURCE_INDEX].endsWith(File.separator)){
-						rowData[SOURCE_INDEX] += File.separator;
-					}
-					model.addRow(rowData);						
-				}
-				if(patternSelector != null){
-					patternSelector.update();
-				}
-			}
-			
-		});
 	}
 
 	/**
@@ -158,6 +147,23 @@ public class FileTable extends DnDFilePanel{
 	public void setNewNameList(ArrayList<String> list){
 		for(int i = 0 ; i < list.size() ; i++){
 			model.setValueAt(list.get(i), i, NEW_NAME_INDEX);
+		}
+	}
+
+	@Override
+	public void filesDropped(File[] arg0) {
+		for (File file : arg0) {
+			String [] rowData = new String[3];
+			rowData[OLD_NAME_INDEX] = file.getName();
+			rowData[NEW_NAME_INDEX] = file.getName();
+			rowData[SOURCE_INDEX] = file.getParent();
+			if(!rowData[SOURCE_INDEX].endsWith(File.separator)){
+				rowData[SOURCE_INDEX] += File.separator;
+			}
+			model.addRow(rowData);						
+		}
+		if(patternSelector != null){
+			patternSelector.update();
 		}
 	}
 
