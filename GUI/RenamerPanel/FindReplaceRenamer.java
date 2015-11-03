@@ -3,6 +3,8 @@ package HexalFileNameManager.GUI.RenamerPanel;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import javax.swing.JCheckBox;
@@ -24,7 +26,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class FindReplaceRenamer extends RenamerAbstractPanel {
+public class FindReplaceRenamer extends RenamerAbstractPanel implements DocumentListener, ActionListener, ChangeListener{
 
 	private static final long serialVersionUID = 5215673525341635563L;
 
@@ -56,20 +58,22 @@ public class FindReplaceRenamer extends RenamerAbstractPanel {
 
 	/**
 	 * Cosntructor de la clase
-	 * @param table tabla de archivos
 	 */
-	public FindReplaceRenamer(FileTable table) {
+	public FindReplaceRenamer() {
 		super();
 		//instancia los objetos de la calse
-		this.table = table;
+		this.table = FileTable.getInstence();
 		pattern = new JTextFieldHint();
-		pattern.setHint("Buscar: ");
 		replacement = new JTextFieldHint();
-		replacement.setHint("Reemplazo: ");
 		extCheck = new JCheckBox("Conservar Extensión");
-		extCheck.setSelected(true);
 		caseCheck = new JCheckBox("Ignorar Capitalizacion");
+		
+		//Setea los componentes de la clase
+		pattern.setHint("Buscar: ");
+		replacement.setHint("Reemplazo: ");
+		extCheck.setSelected(true);
 		caseCheck.setSelected(true);
+		
 		//agrega los componentes al panel
 		this.setLayout(new BorderLayout());
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -107,52 +111,12 @@ public class FindReplaceRenamer extends RenamerAbstractPanel {
 		gbc.fill= GridBagConstraints.HORIZONTAL;
 		panel.add(extCheck , gbc);
 		this.add(panel , BorderLayout.NORTH);
+		
 		//agrega los listeners
-		extCheck.addChangeListener(new ChangeListener(){
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				rename();
-			}
-		});
-		caseCheck.addChangeListener(new ChangeListener(){
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				rename();
-			}
-		});
-		pattern.getDocument().addDocumentListener(new DocumentListener(){
-
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {}
-
-		});
-		replacement.getDocument().addDocumentListener(new DocumentListener(){
-
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {}
-
-		});
-
+		extCheck.addChangeListener(this);
+		caseCheck.addChangeListener(this);
+		pattern.getDocument().addDocumentListener(this);
+		replacement.getDocument().addDocumentListener(this);
 	}
 
 	@Override
@@ -185,5 +149,28 @@ public class FindReplaceRenamer extends RenamerAbstractPanel {
 		}
 		table.setNewNameList(newList);
 	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		rename();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		rename();
+	}
+
+	@Override
+	public void insertUpdate(DocumentEvent e) {
+		rename();
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e) {
+		rename();
+	}
+
+	@Override
+	public void changedUpdate(DocumentEvent e) {}
 
 }

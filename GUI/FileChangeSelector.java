@@ -85,29 +85,43 @@ public class FileChangeSelector extends JPanel implements ItemListener , ActionL
 
 	//panel de renombre 8
 	private ChangeExtensionRenamer rp8;
-
+	
+	//Contiene la instancia de la clase
+	private static FileChangeSelector ins;
+	
 	/**
 	 * ---- CONSTRUCTOR
 	 */
 
 	/**
+	 * Retorna una instancia unica de la clase
+	 * @return Instancia de la clase
+	 */
+	public static FileChangeSelector getInstence(){
+		if(ins == null)
+			ins = new FileChangeSelector();
+		return ins;
+	}
+	
+	/**
 	 * Constructor de la clase
 	 * @param table tabla de archivos
 	 */
-	public FileChangeSelector(FileTable table){
+	private FileChangeSelector(){		
 		//instancia los componentes
 		options = new JComboBox<String>(RENAME_MODE);
 		cl = new CardLayout();
 		renamePanel = new JPanel(cl);
 		gbc = new GridBagConstraints();
-		rp1 = new FindReplaceRenamer(table);
-		rp2 = new SequenceRenamer(table);
-		rp3 = new AddPrefixRenamer(table);
-		rp4 = new AddSuffixRenamer(table);
-		rp5 = new InsertRenamer(table);
-		rp6 = new RemoveRenamer(table);
-		rp7 = new ChangeCaseRenamer(table);
-		rp8 = new ChangeExtensionRenamer(table);
+		rp1 = new FindReplaceRenamer();
+		rp2 = new SequenceRenamer();
+		rp3 = new AddPrefixRenamer();
+		rp4 = new AddSuffixRenamer();
+		rp5 = new InsertRenamer();
+		rp6 = new RemoveRenamer();
+		rp7 = new ChangeCaseRenamer();
+		rp8 = new ChangeExtensionRenamer();
+		
 		//agrega los componentes al panel de renombre
 		renamePanel.add(rp1, RENAME_MODE[0]);
 		renamePanel.add(rp2, RENAME_MODE[1]);
@@ -117,6 +131,7 @@ public class FileChangeSelector extends JPanel implements ItemListener , ActionL
 		renamePanel.add(rp6, RENAME_MODE[5]);
 		renamePanel.add(rp7, RENAME_MODE[6]);
 		renamePanel.add(rp8, RENAME_MODE[7]);
+		
 		//agreg los componentes al panel
 		this.setLayout(new GridBagLayout());
 		gbc.gridx = 0;
@@ -135,6 +150,7 @@ public class FileChangeSelector extends JPanel implements ItemListener , ActionL
 		gbc.weighty = 1.0;
 		gbc.fill= GridBagConstraints.BOTH;
 		this.add(renamePanel , gbc);
+		
 		//setea los componentes
 		options.addActionListener(this);
 		options.addItemListener(this);

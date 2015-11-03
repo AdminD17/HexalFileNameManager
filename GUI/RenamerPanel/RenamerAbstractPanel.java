@@ -22,5 +22,4 @@ public abstract class RenamerAbstractPanel extends JPanel {
 	 */
 	public abstract void rename();
 	
-	
 }

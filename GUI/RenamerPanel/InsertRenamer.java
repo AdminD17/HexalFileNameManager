@@ -31,7 +31,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class InsertRenamer extends RenamerAbstractPanel {
+public class InsertRenamer extends RenamerAbstractPanel implements ActionListener, ItemListener, ChangeListener, DocumentListener{
 
 	private static final long serialVersionUID = -5822764386585784323L;
 
@@ -63,17 +63,17 @@ public class InsertRenamer extends RenamerAbstractPanel {
 
 	/**
 	 * Constructor de la clase
-	 * @param table tabla de archivos
 	 */
-	public InsertRenamer(FileTable table) {
+	public InsertRenamer() {
 		super();
 		//instancia los objetos de la calse
-		this.table = table;
+		this.table = FileTable.getInstence();
 		viewPoint = new JComboBox<String>(VIEW_POINT);
 		startIndex = new JSpinner(new SpinnerNumberModel(0,0,100,1));
 		insert = new JTextAreaHint();
 		insert.setHint("Insertar: ");
 		insert.setColumns(20);
+		
 		//agrega los componentes al panel
 		this.setLayout(new BorderLayout());
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -111,41 +111,12 @@ public class InsertRenamer extends RenamerAbstractPanel {
 		gbc.fill= GridBagConstraints.HORIZONTAL;
 		panel.add(viewPoint , gbc);		
 		this.add(panel , BorderLayout.NORTH);
+		
 		//agrega los listeners
-		viewPoint.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				rename();
-			}
-		});
-		viewPoint.addItemListener(new ItemListener(){
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				rename();
-			}
-		});
-		startIndex.addChangeListener(new ChangeListener(){
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				rename();
-			}
-		});
-		insert.getDocument().addDocumentListener(new DocumentListener(){
-
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {}
-
-		});
+		viewPoint.addActionListener(this);
+		viewPoint.addItemListener(this);
+		startIndex.addChangeListener(this);
+		insert.getDocument().addDocumentListener(this);
 	}
 
 	@Override
@@ -182,5 +153,33 @@ public class InsertRenamer extends RenamerAbstractPanel {
 		}
 		table.setNewNameList(newList);
 	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		rename();
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		rename();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		rename();
+	}
+
+	@Override
+	public void insertUpdate(DocumentEvent e) {
+		rename();
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e) {
+		rename();
+	}
+
+	@Override
+	public void changedUpdate(DocumentEvent e) {}
 
 }

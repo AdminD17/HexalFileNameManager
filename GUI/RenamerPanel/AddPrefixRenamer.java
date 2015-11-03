@@ -19,7 +19,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class AddPrefixRenamer extends RenamerAbstractPanel {
+public class AddPrefixRenamer extends RenamerAbstractPanel implements DocumentListener{
 
 	private static final long serialVersionUID = 8151074486846839862L;
 
@@ -39,14 +39,14 @@ public class AddPrefixRenamer extends RenamerAbstractPanel {
 
 	/**
 	 * Constructor de la clase
-	 * @param table tabla de archivos
 	 */
-	public AddPrefixRenamer(FileTable table) {
+	public AddPrefixRenamer() {
 		super();
 		//instancia los objetos de la clase
-		this.table = table;
+		this.table = FileTable.getInstence();
 		input = new JTextFieldHint();
 		input.setHint("Prefijo: ");
+		
 		//agrega los componentes al panel
 		this.setLayout(new BorderLayout());
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -60,23 +60,9 @@ public class AddPrefixRenamer extends RenamerAbstractPanel {
 		gbc.fill= GridBagConstraints.HORIZONTAL;
 		panel.add(input , gbc);
 		this.add(panel , BorderLayout.NORTH);
+		
 		//agrega los listeners
-		input.getDocument().addDocumentListener(new DocumentListener(){
-
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {}
-
-		});
+		input.getDocument().addDocumentListener(this);
 	}
 
 	@Override
@@ -88,5 +74,18 @@ public class AddPrefixRenamer extends RenamerAbstractPanel {
 		}
 		table.setNewNameList(newList);
 	}
+	
+	@Override
+	public void insertUpdate(DocumentEvent e) {
+		rename();
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e) {
+		rename();
+	}
+
+	@Override
+	public void changedUpdate(DocumentEvent e) {}
 
 }

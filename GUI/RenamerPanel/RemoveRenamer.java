@@ -28,7 +28,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class RemoveRenamer extends RenamerAbstractPanel {
+public class RemoveRenamer extends RenamerAbstractPanel implements ChangeListener , ActionListener , ItemListener{
 
 	private static final long serialVersionUID = -2782592197603201862L;
 
@@ -60,15 +60,15 @@ public class RemoveRenamer extends RenamerAbstractPanel {
 
 	/**
 	 * Constructor de la clase
-	 * @param table tabla de archivos
 	 */
-	public RemoveRenamer(FileTable table) {
+	public RemoveRenamer() {
 		super();
 		//instancia los componentes
 		removeCharacters = new JSpinner(new SpinnerNumberModel(0,0,100,1));
 		startIndex = new JSpinner(new SpinnerNumberModel(0,0,100,1));
 		viewPoint = new JComboBox<String>(VIEW_POINT);
-		this.table = table;
+		this.table = FileTable.getInstence();
+
 		//agrega los componentes al panel
 		this.setLayout(new BorderLayout());
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -122,31 +122,12 @@ public class RemoveRenamer extends RenamerAbstractPanel {
 		gbc.fill= GridBagConstraints.HORIZONTAL;
 		panel.add(viewPoint , gbc);
 		this.add(panel , BorderLayout.NORTH);
+
 		//agrega los listeners
-		removeCharacters.addChangeListener(new ChangeListener(){
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				rename();
-			}
-		});
-		startIndex.addChangeListener(new ChangeListener(){
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				rename();
-			}
-		});
-		viewPoint.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				rename();
-			}
-		});
-		viewPoint.addItemListener(new ItemListener(){
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				rename();
-			}
-		});
+		removeCharacters.addChangeListener(this);
+		startIndex.addChangeListener(this);
+		viewPoint.addActionListener(this);
+		viewPoint.addItemListener(this);
 	}
 
 	@Override
@@ -187,6 +168,21 @@ public class RemoveRenamer extends RenamerAbstractPanel {
 			newList.add(temporal);
 		}
 		table.setNewNameList(newList);
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		rename();
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		rename();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		rename();
 	}
 
 }

@@ -25,7 +25,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class ChangeCaseRenamer extends RenamerAbstractPanel {
+public class ChangeCaseRenamer extends RenamerAbstractPanel implements ActionListener, ItemListener{
 
 	private static final long serialVersionUID = 3480338868936959200L;
 
@@ -64,14 +64,14 @@ public class ChangeCaseRenamer extends RenamerAbstractPanel {
 
 	/**
 	 * Constructor de la clase
-	 * @param table tabla de archivos
 	 */
-	public ChangeCaseRenamer(FileTable table) {
+	public ChangeCaseRenamer() {
 		super();
 		//instancia los componentes
-		this.table = table;
+		this.table = FileTable.getInstence();
 		this.nameOptions = new JComboBox<String>(namePatterns);
 		this.extensionOptions = new JComboBox<String>(extensionPatterns);
+		
 		//agrega los componentes al panel
 		this.setLayout(new BorderLayout());
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -109,31 +109,12 @@ public class ChangeCaseRenamer extends RenamerAbstractPanel {
 		gbc.fill= GridBagConstraints.HORIZONTAL;
 		panel.add(extensionOptions , gbc);
 		this.add(panel , BorderLayout.NORTH);
+		
 		//agrega los listeners
-		nameOptions.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				rename();
-			}
-		});
-		nameOptions.addItemListener(new ItemListener(){
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				rename();
-			}
-		});
-		extensionOptions.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				rename();
-			}
-		});
-		extensionOptions.addItemListener(new ItemListener(){
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				rename();
-			}
-		});
+		nameOptions.addActionListener(this);
+		nameOptions.addItemListener(this);
+		extensionOptions.addActionListener(this);
+		extensionOptions.addItemListener(this);
 	}
 
 	/**
@@ -215,6 +196,16 @@ public class ChangeCaseRenamer extends RenamerAbstractPanel {
 		else{
 			return null;
 		}
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		rename();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		rename();
 	}
 
 

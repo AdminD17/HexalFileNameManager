@@ -32,7 +32,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class SequenceRenamer extends RenamerAbstractPanel {
+public class SequenceRenamer extends RenamerAbstractPanel implements ActionListener , DocumentListener, ItemListener, ChangeListener{
 
 	private static final long serialVersionUID = 792376107200566704L;
 
@@ -74,21 +74,23 @@ public class SequenceRenamer extends RenamerAbstractPanel {
 
 	/**
 	 * Constructor de la clase
-	 * @param table tabla de archivos
 	 */
-	public SequenceRenamer(FileTable table) {
+	public SequenceRenamer() {
 		super();
 		//instancia los objetos de la clase
-		this.table = table;
+		this.table = FileTable.getInstence();
 		pattern = new JComboBox<String>(SEQUENCE_OPTIONS);	
 		startIn = new JSpinner(new SpinnerNumberModel(0,0,100,1));
 		incr = new JSpinner(new SpinnerNumberModel(1,1,100,1));
 		prefix = new JTextFieldHint();
-		prefix.setHint("Prefijo: ");
 		suffix = new JTextFieldHint();
-		suffix.setHint("Sufijo: ");
 		keepExt = new JCheckBox("Mantener Extension ");
+
+		//Setea los objetos de la clase
+		prefix.setHint("Prefijo: ");
+		suffix.setHint("Sufijo: ");
 		keepExt.setSelected(true);
+
 		//agrega los objetos al panel
 		this.setLayout(new BorderLayout());
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -158,61 +160,13 @@ public class SequenceRenamer extends RenamerAbstractPanel {
 		gbc.fill= GridBagConstraints.HORIZONTAL;
 		panel.add(keepExt , gbc);
 		this.add(panel , BorderLayout.NORTH);
+
 		//agrega los listeners
-		pattern.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				rename();
-			}
-		});
-		pattern.addItemListener(new ItemListener(){
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				rename();
-			}
-		});
-		startIn.addChangeListener(new ChangeListener(){
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				rename();
-			}
-		});
-		incr.addChangeListener(new ChangeListener(){
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				rename();
-			}
-		});
-		prefix.getDocument().addDocumentListener(new DocumentListener(){
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {}
-
-		});
-		suffix.getDocument().addDocumentListener(new DocumentListener(){
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {}
-
-		});
+		pattern.addActionListener(this);
+		pattern.addItemListener(this);
+		startIn.addChangeListener(this);
+		prefix.getDocument().addDocumentListener(this);
+		suffix.getDocument().addDocumentListener(this);
 	}
 
 	@Override
@@ -242,11 +196,11 @@ public class SequenceRenamer extends RenamerAbstractPanel {
 	}
 
 	/**
-	 * 
-	 * @param index
-	 * @param extension
-	 * @param digits
-	 * @return
+	 * Forma el nombre del archivo
+	 * @param index Indice en la lista
+	 * @param extension Extension del archivo
+	 * @param digits Cantidad maxima de digitos de la secuencia
+	 * @return Nuevo nombre del archivo
 	 */
 	private String seqArabic(int index , String extension , int digits){
 		String ret = prefix.getContent();
@@ -255,6 +209,34 @@ public class SequenceRenamer extends RenamerAbstractPanel {
 		ret += suffix.getContent();
 		ret += extension;
 		return ret;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		rename();
+	}
+
+	@Override
+	public void insertUpdate(DocumentEvent e) {
+		rename();
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e) {
+		rename();
+	}
+
+	@Override
+	public void changedUpdate(DocumentEvent e) {}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		rename();
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		rename();
 	}
 
 }

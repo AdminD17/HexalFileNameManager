@@ -67,15 +67,28 @@ public class FileTable extends JPanel implements Listener{
 	//API Drag an drop
 	@SuppressWarnings("unused")
 	private FileDrop dnd;
+	
+	//Contiene una instancia de la clase
+	private static FileTable ins;
 
 	/**
 	 * ---- CONSTRUCTOR
 	 */
 
 	/**
+	 * Retorna una instancia unica de la clase
+	 * @return Instancia de la clase
+	 */
+	public static FileTable getInstence(){
+		if(ins == null)
+			ins = new FileTable();
+		return ins;
+	}
+	
+	/**
 	 * Cosntructor de la clase
 	 */
-	public FileTable(){
+	private FileTable(){
 		//instancia los objetos
 		gbc = new GridBagConstraints();
 		model = new DefaultTableModel();

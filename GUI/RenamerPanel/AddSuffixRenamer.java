@@ -24,7 +24,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class AddSuffixRenamer extends RenamerAbstractPanel {
+public class AddSuffixRenamer extends RenamerAbstractPanel implements DocumentListener, ChangeListener{
 
 	private static final long serialVersionUID = -4156508698010972847L;
 
@@ -47,16 +47,18 @@ public class AddSuffixRenamer extends RenamerAbstractPanel {
 
 	/**
 	 * Constructor de la clase
-	 * @param table tabla de archivos
 	 */
-	public AddSuffixRenamer(FileTable table) {
+	public AddSuffixRenamer() {
 		super();
 		//instancia los objetos de la clase
-		this.table = table;
+		this.table = FileTable.getInstence();
 		check = new JCheckBox("Mantener la extension");
-		check.setSelected(true);
 		input = new JTextFieldHint();
+		
+		//Setea los componentes de la clase
+		check.setSelected(true);
 		input.setHint("Sufijo: ");
+		
 		//agrega los componentes al panel
 		this.setLayout(new BorderLayout());
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -78,31 +80,10 @@ public class AddSuffixRenamer extends RenamerAbstractPanel {
 		gbc.fill= GridBagConstraints.HORIZONTAL;
 		panel.add(check , gbc);
 		this.add(panel , BorderLayout.NORTH);
+		
 		//agrega los listeners
-		input.getDocument().addDocumentListener(new DocumentListener(){
-
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				rename();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {}
-
-		});
-		check.addChangeListener(new ChangeListener(){
-
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				rename();
-			}
-
-		});
+		input.getDocument().addDocumentListener(this);
+		check.addChangeListener(this);
 	}
 
 	@Override
@@ -123,5 +104,23 @@ public class AddSuffixRenamer extends RenamerAbstractPanel {
 		}
 		table.setNewNameList(newList);
 	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		rename();
+	}
+
+	@Override
+	public void insertUpdate(DocumentEvent e) {
+		rename();
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e) {
+		rename();
+	}
+
+	@Override
+	public void changedUpdate(DocumentEvent e) {}
 
 }
