@@ -3,7 +3,6 @@ package HexalFileNameManager.GUI.RenamerPanel;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.ArrayList;
 
 import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
@@ -11,6 +10,7 @@ import javax.swing.event.DocumentListener;
 
 import ExtraClass.GUI.JTextFieldHint;
 import HexalFileNameManager.GUI.FileTable;
+import HexalFileNameManager.GUI.RenamePanel;
 
 /**
  * Panel para renombrar archivos.
@@ -19,7 +19,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class AddPrefixRenamer extends RenamerAbstractPanel implements DocumentListener{
+public class AddPrefixRenamer extends JPanel implements RenamerPanelInterface, DocumentListener{
 
 	private static final long serialVersionUID = 8151074486846839862L;
 
@@ -46,7 +46,7 @@ public class AddPrefixRenamer extends RenamerAbstractPanel implements DocumentLi
 		this.table = FileTable.getInstence();
 		input = new JTextFieldHint();
 		input.setHint("Prefijo: ");
-		
+
 		//agrega los componentes al panel
 		this.setLayout(new BorderLayout());
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -60,29 +60,24 @@ public class AddPrefixRenamer extends RenamerAbstractPanel implements DocumentLi
 		gbc.fill= GridBagConstraints.HORIZONTAL;
 		panel.add(input , gbc);
 		this.add(panel , BorderLayout.NORTH);
-		
+
 		//agrega los listeners
 		input.getDocument().addDocumentListener(this);
 	}
 
 	@Override
-	public void rename() {
-		ArrayList<String> oldList = table.getOldNameList();
-		ArrayList<String> newList = new ArrayList<String>();
-		for(String str : oldList){
-			newList.add(input.getContent() + str);
-		}
-		table.setNewNameList(newList);
+	public String rename(String str , int size , int index){
+		return RenamePanel.extractString(input) + str;
 	}
-	
+
 	@Override
 	public void insertUpdate(DocumentEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void removeUpdate(DocumentEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override

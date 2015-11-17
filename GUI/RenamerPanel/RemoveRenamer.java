@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -28,7 +27,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class RemoveRenamer extends RenamerAbstractPanel implements ChangeListener , ActionListener , ItemListener{
+public class RemoveRenamer extends JPanel implements RenamerPanelInterface, ChangeListener , ActionListener , ItemListener{
 
 	private static final long serialVersionUID = -2782592197603201862L;
 
@@ -131,58 +130,54 @@ public class RemoveRenamer extends RenamerAbstractPanel implements ChangeListene
 	}
 
 	@Override
-	public void rename() {
-		ArrayList<String> oldList = table.getOldNameList();
-		ArrayList<String> newList = new ArrayList<String>();
+	public String rename(String str , int size , int index) {
 		int cantElim = (int) removeCharacters.getValue();
 		int begIndex = (int) startIndex.getValue();
 		int vp = viewPoint.getSelectedIndex();
-		for(String str : oldList){
-			String name = FilenameUtils.getBaseName(str);
-			String temporal = "";
-			if(vp == 0){
-				if(begIndex >= name.length()){
-					begIndex = name.length() - 1;
-				}
-				temporal = name.substring(0, begIndex);
-				begIndex += cantElim;
-				if(begIndex >= name.length()){
-					begIndex = name.length() ;
-				}
-				temporal += name.substring(begIndex, name.length());
+		String name = FilenameUtils.getBaseName(str);
+		String temporal = "";
+		if(vp == 0){
+			if(begIndex >= name.length()){
+				begIndex = name.length() - 1;
 			}
-			else{
-				if(begIndex >= name.length()){
-					begIndex = name.length();
-				}
-				if(begIndex - cantElim > 0){
-					temporal += name.substring(0, begIndex - cantElim);
-				}
-				temporal += name.substring(begIndex, name.length());
+			temporal = name.substring(0, begIndex);
+			begIndex += cantElim;
+			if(begIndex >= name.length()){
+				begIndex = name.length() ;
 			}
-			if(temporal.length() == 0){
-				temporal = name;
-			}
-			temporal += FilenameUtils.EXTENSION_SEPARATOR_STR;
-			temporal += FilenameUtils.getExtension(str);
-			newList.add(temporal);
+			temporal += name.substring(begIndex, name.length());
 		}
-		table.setNewNameList(newList);
+		else{
+			if(begIndex >= name.length()){
+				begIndex = name.length();
+			}
+			if(begIndex - cantElim > 0){
+				temporal += name.substring(0, begIndex - cantElim);
+			}
+			temporal += name.substring(begIndex, name.length());
+		}
+		if(temporal.length() == 0){
+			temporal = name;
+		}
+		temporal += FilenameUtils.EXTENSION_SEPARATOR_STR;
+		temporal += FilenameUtils.getExtension(str);
+		return temporal;
 	}
+
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 }

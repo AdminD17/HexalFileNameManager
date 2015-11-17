@@ -1,8 +1,7 @@
 package HexalFileNameManager.GUI;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -11,6 +10,7 @@ import java.awt.event.ItemListener;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
+import ExtraClass.GUI.JTextFieldHint;
 import HexalFileNameManager.GUI.RenamerPanel.AddPrefixRenamer;
 import HexalFileNameManager.GUI.RenamerPanel.AddSuffixRenamer;
 import HexalFileNameManager.GUI.RenamerPanel.ChangeCaseRenamer;
@@ -18,6 +18,7 @@ import HexalFileNameManager.GUI.RenamerPanel.ChangeExtensionRenamer;
 import HexalFileNameManager.GUI.RenamerPanel.FindReplaceRenamer;
 import HexalFileNameManager.GUI.RenamerPanel.InsertRenamer;
 import HexalFileNameManager.GUI.RenamerPanel.RemoveRenamer;
+import HexalFileNameManager.GUI.RenamerPanel.RenamerPanelInterface;
 import HexalFileNameManager.GUI.RenamerPanel.SequenceRenamer;
 
 /**
@@ -26,7 +27,7 @@ import HexalFileNameManager.GUI.RenamerPanel.SequenceRenamer;
  * @author David Giordana
  *
  */
-public class FileChangeSelector extends JPanel implements ItemListener , ActionListener{
+public class RenamePanel extends JPanel implements RenamerPanelInterface, ItemListener , ActionListener{
 
 	private static final long serialVersionUID = 8443560997673751813L;
 
@@ -59,8 +60,8 @@ public class FileChangeSelector extends JPanel implements ItemListener , ActionL
 	//layout del panel de renombre
 	private CardLayout cl;
 
-	//constraint para el layout del panel
-	private GridBagConstraints gbc;
+	//Panel de renombre actual
+	private RenamerPanelInterface actualPanel;
 
 	//panel de renombre 1
 	private FindReplaceRenamer rp1;
@@ -85,34 +86,20 @@ public class FileChangeSelector extends JPanel implements ItemListener , ActionL
 
 	//panel de renombre 8
 	private ChangeExtensionRenamer rp8;
-	
-	//Contiene la instancia de la clase
-	private static FileChangeSelector ins;
-	
+
 	/**
 	 * ---- CONSTRUCTOR
 	 */
 
 	/**
-	 * Retorna una instancia unica de la clase
-	 * @return Instancia de la clase
-	 */
-	public static FileChangeSelector getInstence(){
-		if(ins == null)
-			ins = new FileChangeSelector();
-		return ins;
-	}
-	
-	/**
 	 * Constructor de la clase
 	 * @param table tabla de archivos
 	 */
-	private FileChangeSelector(){		
+	public RenamePanel(){		
 		//instancia los componentes
 		options = new JComboBox<String>(RENAME_MODE);
 		cl = new CardLayout();
 		renamePanel = new JPanel(cl);
-		gbc = new GridBagConstraints();
 		rp1 = new FindReplaceRenamer();
 		rp2 = new SequenceRenamer();
 		rp3 = new AddPrefixRenamer();
@@ -121,7 +108,8 @@ public class FileChangeSelector extends JPanel implements ItemListener , ActionL
 		rp6 = new RemoveRenamer();
 		rp7 = new ChangeCaseRenamer();
 		rp8 = new ChangeExtensionRenamer();
-		
+		actualPanel = rp1;
+
 		//agrega los componentes al panel de renombre
 		renamePanel.add(rp1, RENAME_MODE[0]);
 		renamePanel.add(rp2, RENAME_MODE[1]);
@@ -131,32 +119,18 @@ public class FileChangeSelector extends JPanel implements ItemListener , ActionL
 		renamePanel.add(rp6, RENAME_MODE[5]);
 		renamePanel.add(rp7, RENAME_MODE[6]);
 		renamePanel.add(rp8, RENAME_MODE[7]);
-		
+
 		//agreg los componentes al panel
-		this.setLayout(new GridBagLayout());
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		gbc.gridwidth = 1;
-		gbc.gridheight = 1;
-		gbc.weightx = 1.0;
-		gbc.weighty = 0.0;
-		gbc.fill= GridBagConstraints.HORIZONTAL;
-		this.add(options , gbc);
-		gbc.gridx = 0;
-		gbc.gridy = 1;
-		gbc.gridwidth = 1;
-		gbc.gridheight = 1;
-		gbc.weightx = 1.0;
-		gbc.weighty = 1.0;
-		gbc.fill= GridBagConstraints.BOTH;
-		this.add(renamePanel , gbc);
-		
+		this.setLayout(new BorderLayout());
+		this.add(options , BorderLayout.NORTH);
+		this.add(renamePanel , BorderLayout.CENTER);
+
 		//setea los componentes
 		options.addActionListener(this);
 		options.addItemListener(this);
 		cl.show(renamePanel, (String)options.getSelectedItem());
 	}
-	
+
 	/**
 	 * ---- LISTENER METHODS
 	 */
@@ -174,7 +148,7 @@ public class FileChangeSelector extends JPanel implements ItemListener , ActionL
 			update();
 		}
 	}
-	
+
 	/**
 	 * ---- METHODS
 	 */
@@ -184,31 +158,60 @@ public class FileChangeSelector extends JPanel implements ItemListener , ActionL
 	 */
 	public void update(){
 		int selected = options.getSelectedIndex();
-		cl.show(renamePanel, (String)options.getSelectedItem());
 		if(selected == 0){
-			rp1.rename();
+			actualPanel = rp1;
 		}
 		else if(selected == 1){
-			rp2.rename();
+			actualPanel = rp2;
 		}
 		else if(selected == 2){
-			rp3.rename();
+			actualPanel = rp3;
 		}
 		else if(selected == 3){
-			rp4.rename();
+			actualPanel = rp4;
 		}
 		else if(selected == 4){
-			rp5.rename();
+			actualPanel = rp5;
 		}
 		else if(selected == 5){
-			rp6.rename();
+			actualPanel = rp6;
 		}
 		else if(selected == 6){
-			rp7.rename();
+			actualPanel = rp7;
 		}
 		else if(selected == 7){
-			rp8.rename();
+			actualPanel = rp8;
 		}
+		FileTable.getInstence().updateNewName();
+		cl.show(renamePanel, (String)options.getSelectedItem());
+	}
+
+	/**
+	 * Extrae el contenido  de un campo de texto
+	 * @param textField Campo de texto para extraer la informacion
+	 * @return Cadena de texto util
+	 */
+	public static String extractString(JTextFieldHint textField){
+		String str = textField.getContent();
+		String ret = "";
+		for(int i = 0 ; i < str.length() ; i++){
+			char c = str.charAt(i);
+			if(c == '('){
+				ret += "\\(";
+			}
+			else if(c == ')'){
+				ret += "\\)";
+			}
+			else{
+				ret += c;
+			}
+		}
+		return ret;
+	}
+	
+	@Override
+	public String rename(String str, int size, int index) {
+		return actualPanel.rename(str, size, index);
 	}
 
 }

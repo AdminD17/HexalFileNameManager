@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -24,6 +23,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import ExtraClass.GUI.JTextFieldHint;
 import HexalFileNameManager.GUI.FileTable;
+import HexalFileNameManager.GUI.RenamePanel;
 
 /**
  * Panel para renombrar archivos.
@@ -32,7 +32,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class SequenceRenamer extends RenamerAbstractPanel implements ActionListener , DocumentListener, ItemListener, ChangeListener{
+public class SequenceRenamer extends JPanel implements RenamerPanelInterface, ActionListener , DocumentListener, ItemListener, ChangeListener{
 
 	private static final long serialVersionUID = 792376107200566704L;
 
@@ -170,29 +170,29 @@ public class SequenceRenamer extends RenamerAbstractPanel implements ActionListe
 	}
 
 	@Override
-	public void rename() {
-		ArrayList<String> oldList = table.getOldNameList();
-		ArrayList<String> newList = new ArrayList<String>();
+	public String rename(String str , int size , int index){
 		int patternSelected = pattern.getSelectedIndex();
-		for(int i = 0 ; i < oldList.size() ; i++){
-			String ext = "";
-			//controla la extension
-			if(keepExt.isSelected()){
-				String temp = FilenameUtils.getExtension(oldList.get(i));
-				if(temp.length() > 0){
-					ext += FilenameUtils.EXTENSION_SEPARATOR_STR;
-					ext += temp;
-				}
-			}
-			if(patternSelected == 0){
-				int incr = (int) this.incr.getValue();
-				int initialVal = (int) this.startIn.getValue();
-				int maxValue = (oldList.size() - 1)*incr +initialVal;
-				String temp = seqArabic(i , ext , Integer.toString(maxValue).length());
-				newList.add(temp);
+		String ext = "";
+		
+		//controla la extension
+		if(keepExt.isSelected()){
+			String temp = FilenameUtils.getExtension(str);
+			if(temp.length() > 0){
+				ext += FilenameUtils.EXTENSION_SEPARATOR_STR;
+				ext += temp;
 			}
 		}
-		table.setNewNameList(newList);
+		
+		//Secuencia arábica
+		if(patternSelected == 0){
+			int incr = (int) this.incr.getValue();
+			int initialVal = (int) this.startIn.getValue();
+			int maxValue = (size - 1)* incr + initialVal;
+			return seqArabic(index , ext , Integer.toString(maxValue).length());
+		}
+
+		System.err.println("No cabe en patron de secuencia");
+		return "";
 	}
 
 	/**
@@ -206,24 +206,24 @@ public class SequenceRenamer extends RenamerAbstractPanel implements ActionListe
 		String ret = prefix.getContent();
 		int num = (index*(int) this.incr.getValue()) + (int) this.startIn.getValue();
 		ret += String.format("%" + digits +"d" , num);
-		ret += suffix.getContent();
+		ret += RenamePanel.extractString(suffix);
 		ret += extension;
 		return ret;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void insertUpdate(DocumentEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void removeUpdate(DocumentEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
@@ -231,12 +231,12 @@ public class SequenceRenamer extends RenamerAbstractPanel implements ActionListe
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 }

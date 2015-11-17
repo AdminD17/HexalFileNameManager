@@ -3,7 +3,6 @@ package HexalFileNameManager.GUI.RenamerPanel;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.ArrayList;
 
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
@@ -16,6 +15,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import ExtraClass.GUI.JTextFieldHint;
 import HexalFileNameManager.GUI.FileTable;
+import HexalFileNameManager.GUI.RenamePanel;
 
 /**
  * Panel para renombrar archivos.
@@ -24,7 +24,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class AddSuffixRenamer extends RenamerAbstractPanel implements DocumentListener, ChangeListener{
+public class AddSuffixRenamer extends JPanel implements RenamerPanelInterface, DocumentListener, ChangeListener{
 
 	private static final long serialVersionUID = -4156508698010972847L;
 
@@ -87,37 +87,32 @@ public class AddSuffixRenamer extends RenamerAbstractPanel implements DocumentLi
 	}
 
 	@Override
-	public void rename() {
-		ArrayList<String> oldList = table.getOldNameList();
-		ArrayList<String> newList = new ArrayList<String>();
-		for(String str : oldList){
+	public String rename(String str , int size , int index){
 			String temp;
 			if(check.isSelected()){
-				temp = FilenameUtils.getBaseName(str) + input.getContent();
+				temp = FilenameUtils.getBaseName(str) + RenamePanel.extractString(input);
 				temp += FilenameUtils.EXTENSION_SEPARATOR_STR;
 				temp += FilenameUtils.getExtension(str);
 			}
 			else{
-				temp = str + input.getContent();
+				temp = str + RenamePanel.extractString(input);
 			}
-			newList.add(temp);
-		}
-		table.setNewNameList(newList);
+			return temp;
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void insertUpdate(DocumentEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void removeUpdate(DocumentEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override

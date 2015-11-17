@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -21,8 +20,9 @@ import javax.swing.event.DocumentListener;
 
 import org.apache.commons.io.FilenameUtils;
 
-import ExtraClass.GUI.JTextAreaHint;
+import ExtraClass.GUI.JTextFieldHint;
 import HexalFileNameManager.GUI.FileTable;
+import HexalFileNameManager.GUI.RenamePanel;
 
 /**
  * Panel para renombrar archivos.
@@ -31,7 +31,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class InsertRenamer extends RenamerAbstractPanel implements ActionListener, ItemListener, ChangeListener, DocumentListener{
+public class InsertRenamer extends JPanel implements RenamerPanelInterface, ActionListener, ItemListener, ChangeListener, DocumentListener{
 
 	private static final long serialVersionUID = -5822764386585784323L;
 
@@ -46,7 +46,7 @@ public class InsertRenamer extends RenamerAbstractPanel implements ActionListene
 	};
 
 	//texto a insertar
-	private JTextAreaHint insert;
+	private JTextFieldHint insert;
 
 	//indice de partida del conteo
 	private JSpinner startIndex;
@@ -70,10 +70,10 @@ public class InsertRenamer extends RenamerAbstractPanel implements ActionListene
 		this.table = FileTable.getInstence();
 		viewPoint = new JComboBox<String>(VIEW_POINT);
 		startIndex = new JSpinner(new SpinnerNumberModel(0,0,100,1));
-		insert = new JTextAreaHint();
+		insert = new JTextFieldHint();
 		insert.setHint("Insertar: ");
 		insert.setColumns(20);
-		
+
 		//agrega los componentes al panel
 		this.setLayout(new BorderLayout());
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -111,7 +111,7 @@ public class InsertRenamer extends RenamerAbstractPanel implements ActionListene
 		gbc.fill= GridBagConstraints.HORIZONTAL;
 		panel.add(viewPoint , gbc);		
 		this.add(panel , BorderLayout.NORTH);
-		
+
 		//agrega los listeners
 		viewPoint.addActionListener(this);
 		viewPoint.addItemListener(this);
@@ -120,63 +120,59 @@ public class InsertRenamer extends RenamerAbstractPanel implements ActionListene
 	}
 
 	@Override
-	public void rename() {
-		ArrayList<String> oldList = table.getOldNameList();
-		ArrayList<String> newList = new ArrayList<String>();
+	public String rename(String str , int size , int index){
 		int begIndex = (int) startIndex.getValue();
 		int vp = viewPoint.getSelectedIndex();
-		for(String str : oldList){
-			String name = FilenameUtils.getBaseName(str);
-			String temporal = "";
-			if(vp == 0){
-				if(begIndex >= name.length()){
-					begIndex = name.length();
-				}
-				temporal += name.substring(0, begIndex);
-				temporal += insert.getContent();
-				temporal += name.substring(begIndex, name.length());
+		String name = FilenameUtils.getBaseName(str);
+		String temporal = "";
+		if(vp == 0){
+			if(begIndex >= name.length()){
+				begIndex = name.length();
+			}
+			temporal += name.substring(0, begIndex);
+			temporal += RenamePanel.extractString(insert);
+			temporal += name.substring(begIndex, name.length());
+		}
+		else{
+			if(begIndex >= name.length()){
+				begIndex = 0;
 			}
 			else{
-				if(begIndex >= name.length()){
-					begIndex = 0;
-				}
-				else{
-					begIndex = name.length() - begIndex;
-				}
-				temporal += name.substring(0, begIndex);
-				temporal += insert.getContent();
-				temporal += name.substring(begIndex, name.length());
+				begIndex = name.length() - begIndex;
 			}
-			temporal += FilenameUtils.EXTENSION_SEPARATOR_STR;
-			temporal += FilenameUtils.getExtension(str);
-			newList.add(temporal);
+			temporal += name.substring(0, begIndex);
+			temporal += insert.getContent();
+			temporal += name.substring(begIndex, name.length());
 		}
-		table.setNewNameList(newList);
+		temporal += FilenameUtils.EXTENSION_SEPARATOR_STR;
+		temporal += FilenameUtils.getExtension(str);
+		return temporal;
 	}
+
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void insertUpdate(DocumentEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void removeUpdate(DocumentEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override

@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -25,7 +24,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class ChangeCaseRenamer extends RenamerAbstractPanel implements ActionListener, ItemListener{
+public class ChangeCaseRenamer extends JPanel implements RenamerPanelInterface, ActionListener, ItemListener{
 
 	private static final long serialVersionUID = 3480338868936959200L;
 
@@ -71,7 +70,7 @@ public class ChangeCaseRenamer extends RenamerAbstractPanel implements ActionLis
 		this.table = FileTable.getInstence();
 		this.nameOptions = new JComboBox<String>(namePatterns);
 		this.extensionOptions = new JComboBox<String>(extensionPatterns);
-		
+
 		//agrega los componentes al panel
 		this.setLayout(new BorderLayout());
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -109,7 +108,7 @@ public class ChangeCaseRenamer extends RenamerAbstractPanel implements ActionLis
 		gbc.fill= GridBagConstraints.HORIZONTAL;
 		panel.add(extensionOptions , gbc);
 		this.add(panel , BorderLayout.NORTH);
-		
+
 		//agrega los listeners
 		nameOptions.addActionListener(this);
 		nameOptions.addItemListener(this);
@@ -122,17 +121,12 @@ public class ChangeCaseRenamer extends RenamerAbstractPanel implements ActionLis
 	 */
 
 	@Override
-	public void rename() {
-		ArrayList<String> oldList = table.getOldNameList();
-		ArrayList<String> newList = new ArrayList<String>();
-		for(String str : oldList){
-			String temp = "";
-			temp += renameName(FilenameUtils.getBaseName(str));
-			temp += FilenameUtils.EXTENSION_SEPARATOR_STR;
-			temp += renameExtension(FilenameUtils.getExtension(str));
-			newList.add(temp);
-		}
-		table.setNewNameList(newList);
+	public String rename(String str , int size , int index){
+		String temp = "";
+		temp += renameName(FilenameUtils.getBaseName(str));
+		temp += FilenameUtils.EXTENSION_SEPARATOR_STR;
+		temp += renameExtension(FilenameUtils.getExtension(str));
+		return temp;
 	}
 
 	/**
@@ -200,12 +194,12 @@ public class ChangeCaseRenamer extends RenamerAbstractPanel implements ActionLis
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 

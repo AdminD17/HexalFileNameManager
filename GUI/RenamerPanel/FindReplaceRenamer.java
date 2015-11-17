@@ -5,7 +5,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
@@ -18,6 +17,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import ExtraClass.GUI.JTextFieldHint;
 import HexalFileNameManager.GUI.FileTable;
+import HexalFileNameManager.GUI.RenamePanel;
 
 /**
  * Panel para renombrar archivos.
@@ -26,7 +26,7 @@ import HexalFileNameManager.GUI.FileTable;
  * @author David Giordana
  *
  */
-public class FindReplaceRenamer extends RenamerAbstractPanel implements DocumentListener, ActionListener, ChangeListener{
+public class FindReplaceRenamer extends JPanel implements RenamerPanelInterface, DocumentListener, ActionListener, ChangeListener{
 
 	private static final long serialVersionUID = 5215673525341635563L;
 
@@ -62,18 +62,18 @@ public class FindReplaceRenamer extends RenamerAbstractPanel implements Document
 	public FindReplaceRenamer() {
 		super();
 		//instancia los objetos de la calse
-		this.table = FileTable.getInstence();
+		table = FileTable.getInstence();
 		pattern = new JTextFieldHint();
 		replacement = new JTextFieldHint();
 		extCheck = new JCheckBox("Conservar Extensión");
 		caseCheck = new JCheckBox("Ignorar Capitalizacion");
-		
+
 		//Setea los componentes de la clase
 		pattern.setHint("Buscar: ");
 		replacement.setHint("Reemplazo: ");
 		extCheck.setSelected(true);
 		caseCheck.setSelected(true);
-		
+
 		//agrega los componentes al panel
 		this.setLayout(new BorderLayout());
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -111,63 +111,68 @@ public class FindReplaceRenamer extends RenamerAbstractPanel implements Document
 		gbc.fill= GridBagConstraints.HORIZONTAL;
 		panel.add(extCheck , gbc);
 		this.add(panel , BorderLayout.NORTH);
-		
+
 		//agrega los listeners
 		extCheck.addChangeListener(this);
 		caseCheck.addChangeListener(this);
 		pattern.getDocument().addDocumentListener(this);
 		replacement.getDocument().addDocumentListener(this);
 	}
-
+	
 	@Override
-	public void rename() {
-		ArrayList<String> oldList = table.getOldNameList();
-		ArrayList<String> newList = new ArrayList<String>();
-		for(String str : oldList){
-			String temporal = "";
-			if(extCheck.isSelected()){
-				temporal = FilenameUtils.getBaseName(str);
-				if(caseCheck.isSelected()){
-					temporal = temporal.replaceAll("(?i)" + pattern.getContent(), replacement.getContent());
-				}
-				else{
-					temporal = temporal.replaceAll(pattern.getContent(), replacement.getContent());
-				}
-				temporal += FilenameUtils.EXTENSION_SEPARATOR_STR;
-				temporal += FilenameUtils.getExtension(str);
-			}
-			else{
-				temporal = str;
-				if(caseCheck.isSelected()){
-					temporal = temporal.replaceAll("(?i)" + pattern.getContent(), replacement.getContent());
-				}
-				else{
-					temporal = temporal.replaceAll(pattern.getContent(), replacement.getContent());
-				}
-			}
-			newList.add(temporal);
+	public String rename(String str , int size , int index){
+		String temp = str;
+		String name = FilenameUtils.getBaseName(str);
+		String extension = FilenameUtils.getExtension(str);
+		String Spattern = RenamePanel.extractString(pattern);
+		String Rreplacement = RenamePanel.extractString(replacement);
+
+		//Evita trabajar el caso inutil
+		if(Spattern.isEmpty()){
+			return str;
 		}
-		table.setNewNameList(newList);
+
+		if(extension.isEmpty() || !extCheck.isSelected()){
+			extension = "";
+		}
+		else if(!extension.isEmpty()){
+			temp = name;
+			extension = FilenameUtils.EXTENSION_SEPARATOR_STR + extension;
+		}
+		else{
+			temp = name;
+			extension = "";
+		}
+
+		if(caseCheck.isSelected()){
+			temp = temp.replaceAll("(?i)" + Spattern, Rreplacement);
+		}
+		else{
+			temp = temp.replaceAll(Spattern, Rreplacement);
+		}
+
+		return temp + extension;
 	}
+
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void insertUpdate(DocumentEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override
 	public void removeUpdate(DocumentEvent e) {
-		rename();
+		table.updateNewName();
 	}
 
 	@Override

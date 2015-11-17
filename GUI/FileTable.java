@@ -40,9 +40,9 @@ public class FileTable extends JPanel implements Listener{
 
 	//columnas de la tabla
 	public static final String[] COLUMNS = {
-		"Nombre Original" ,
-		"Nuevo Nombre" ,
-		"Origen"
+			"Nombre Original" ,
+			"Nuevo Nombre" ,
+			"Origen"
 	};
 
 	/**
@@ -57,17 +57,14 @@ public class FileTable extends JPanel implements Listener{
 
 	//scroll para la tabla
 	private JScrollPane scroll;
-	
-	//setea el panel de patrones
-	private FileChangeSelector patternSelector;
 
 	//constraint para el layot
 	private GridBagConstraints gbc;
-	
+
 	//API Drag an drop
 	@SuppressWarnings("unused")
 	private FileDrop dnd;
-	
+
 	//Contiene una instancia de la clase
 	private static FileTable ins;
 
@@ -84,7 +81,7 @@ public class FileTable extends JPanel implements Listener{
 			ins = new FileTable();
 		return ins;
 	}
-	
+
 	/**
 	 * Cosntructor de la clase
 	 */
@@ -95,7 +92,7 @@ public class FileTable extends JPanel implements Listener{
 		table = new JTable(model);
 		scroll = new JScrollPane(table);		
 		dnd = new FileDrop(this, this);
-		
+
 		//agrega los componentes al panel
 		this.setLayout(new GridBagLayout());
 		gbc.gridx = 0;
@@ -106,29 +103,29 @@ public class FileTable extends JPanel implements Listener{
 		gbc.weighty = 1.0;
 		gbc.fill= GridBagConstraints.BOTH;
 		this.add(scroll , gbc);
-		
+
 		//setea la tabla
 		model.setColumnIdentifiers(COLUMNS);
 	}
 
 	/**
-	 * setea el panel selector de patrones de renombre
-	 * @param fcs selector de patrones de renombre
-	 */
-	public void setFileChangeSelector(FileChangeSelector fcs){
-		this.patternSelector = fcs;
-	}
-		
-	/**
 	 * renombra los archivos segun la tabla
 	 */
 	public void renameFiles(){
 		for(int i = 0 ; i < table.getRowCount() ; i++){
+			//Extrae la información de la tabla
 			String oldName = (String) model.getValueAt(i, OLD_NAME_INDEX);
 			String newName = (String) model.getValueAt(i, NEW_NAME_INDEX);
 			String parent = (String) model.getValueAt(i, SOURCE_INDEX);
+
+			//Renombra
 			File file = new File(parent + oldName);
-			file.renameTo(new File(parent + newName));
+			boolean renamed = file.renameTo(new File(parent + newName));
+
+			//Si el archivo pudo renombrarse
+			if(renamed){
+				model.setValueAt(newName, i, OLD_NAME_INDEX);
+			}
 		}
 	}
 
@@ -142,7 +139,7 @@ public class FileTable extends JPanel implements Listener{
 	}
 
 	/**
-	 * Retorna la tcolumna de nombres de archivo en forma de lista
+	 * Retorna la columna de nombres de archivo en forma de lista
 	 * @return lista con el contenido de la columna
 	 */
 	public ArrayList<String> getOldNameList(){
@@ -154,12 +151,44 @@ public class FileTable extends JPanel implements Listener{
 	}
 
 	/**
-	 * setea la columna de nuevo nombre
+	 * Retorna la columna de nombres de archivo en forma de lista
+	 * @return lista con el contenido de la columna
+	 */
+	public ArrayList<String> getNewNameList(){
+		ArrayList<String> ret = new ArrayList<String>();
+		for(int i = 0 ; i < model.getRowCount() ; i++){
+			ret.add((String)model.getValueAt(i, NEW_NAME_INDEX));
+		}
+		return ret;
+	}
+
+	/**
+	 * setea la columna de nombre viejo
+	 * @param list lista con el contenido de la columna
+	 */
+	public void setOldNameList(ArrayList<String> list){
+		for(int i = 0 ; i < list.size() ; i++){
+			model.setValueAt(list.get(i), i, OLD_NAME_INDEX);
+		}
+	}
+
+	/**
+	 * setea la columna de nombre nuevo
 	 * @param list lista con el contenido de la columna
 	 */
 	public void setNewNameList(ArrayList<String> list){
 		for(int i = 0 ; i < list.size() ; i++){
 			model.setValueAt(list.get(i), i, NEW_NAME_INDEX);
+		}
+	}
+
+	/**
+	 * Actualiza la lista de nombres de archivos
+	 */
+	public void updateNewName(){
+		for(int i = 0 ; i < model.getRowCount() ; i++){
+			String str = RenamesListPanel.getInstance().rename((String)model.getValueAt(i, OLD_NAME_INDEX),  model.getRowCount(), i);
+			model.setValueAt(str, i, NEW_NAME_INDEX);
 		}
 	}
 
@@ -175,9 +204,7 @@ public class FileTable extends JPanel implements Listener{
 			}
 			model.addRow(rowData);						
 		}
-		if(patternSelector != null){
-			patternSelector.update();
-		}
+		updateNewName();
 	}
 
 }
